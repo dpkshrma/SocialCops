@@ -1,0 +1,21 @@
+.heading{
+	color:#777; font-size:15px;line-height: 1.5;
+}
+.heading i{
+	font-size: 13px;
+	color:#999;
+	cursor: pointer;
+}
+.chart_select .btn-group, .chart_select .btn-group .dropdown-menu{
+	width:100%;
+}
+
+#analytics_leads{
+	padding-bottom: 10px; 
+	margin-bottom: 20px;
+	border-bottom: 1px solid #f4f4f4;
+}
+
+#analytics_leads_box{
+	border-top: none;
+}

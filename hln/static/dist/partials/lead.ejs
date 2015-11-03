@@ -1,0 +1,16 @@
+<div class="slimScrollDiv">
+  <div class="box-body chat" id="chat-box">
+    <div class="item">
+      <img src="<%= reporter_img_src %>" alt="reporter image" class="reporter_img">
+      <p class="message">
+        <a href="#" class="name" title="<%= lead_time %>">
+          <small class="text-muted pull-right"><i class="fa fa-clock-o"></i> <span class="lead_time"><%= lead_time_relative %></span></small>
+          <span class="reporter_name"><%= reporter_name %></span>
+        </a>
+        <span class="lead_text"><%= lead_text %></span>
+      </p>
+    </div><!-- /.item -->
+  </div>
+  <div class="slimScrollBar"></div>
+  <div class="slimScrollRail"></div>
+</div>
