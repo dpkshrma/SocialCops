@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hln.mod_twapi.twapi_handler &mdash; HomelessNet  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="HomelessNet  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hln.mod_twapi.twapi_handler</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Module to handle twitter api stream data&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">tweepy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">hln.mod_twapi.doc_templates</span> <span class="kn">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">hln.mod_twapi.config</span> <span class="kn">as</span> <span class="nn">twapi_config</span>
+
+<div class="viewcode-block" id="Scraper"><a class="viewcode-back" href="../../../hln.mod_twapi.html#hln.mod_twapi.twapi_handler.Scraper">[docs]</a><span class="k">class</span> <span class="nc">Scraper</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Fetches tweets from twitter streaming api using tweepy module&quot;&quot;&quot;</span>
+
+	<span class="n">tweets_limit</span> <span class="o">=</span> <span class="mi">3000</span>
+	<span class="n">count_per_page</span> <span class="o">=</span> <span class="mi">200</span>
+	<span class="n">page_limit</span> <span class="o">=</span> <span class="mi">6</span>
+	<span class="n">page</span> <span class="o">=</span> <span class="mi">0</span>
+
+	<span class="n">leads</span> <span class="o">=</span> <span class="p">[]</span>
+
+	<span class="n">reporters</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="n">reporter_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+	<span class="n">no_exception</span> <span class="o">=</span> <span class="bp">True</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_scrape</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;oauth tweepy using twitter app credentials</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    init_scrape (bool, optional): run scrape function if true</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">auth</span> <span class="o">=</span> <span class="n">tweepy</span><span class="o">.</span><span class="n">OAuthHandler</span><span class="p">(</span><span class="n">twapi_config</span><span class="o">.</span><span class="n">consumer_key</span><span class="p">,</span> <span class="n">twapi_config</span><span class="o">.</span><span class="n">consumer_secret</span><span class="p">)</span>
+		<span class="n">auth</span><span class="o">.</span><span class="n">set_access_token</span><span class="p">(</span><span class="n">twapi_config</span><span class="o">.</span><span class="n">access_token</span><span class="p">,</span> <span class="n">twapi_config</span><span class="o">.</span><span class="n">access_token_secret</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">twapi</span> <span class="o">=</span> <span class="n">tweepy</span><span class="o">.</span><span class="n">API</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">init_scrape</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">scrape</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Scraper.scrape"><a class="viewcode-back" href="../../../hln.mod_twapi.html#hln.mod_twapi.twapi_handler.Scraper.scrape">[docs]</a>	<span class="k">def</span> <span class="nf">scrape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Fetch tweet objects get relevant data as docs</span>
+<span class="sd">		</span>
+<span class="sd">		Returns None</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">tl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tweets_limit</span>
+		<span class="n">cpp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">count_per_page</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">page_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">tl</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">cpp</span><span class="p">)))</span>
+
+		<span class="k">print</span><span class="p">(</span><span class="s">&quot;Fetching twitter api stream pages...&quot;</span><span class="p">)</span>
+
+		<span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_exception</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">+=</span> <span class="mi">1</span>
+			<span class="k">print</span><span class="p">(</span><span class="s">&quot;on page - &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">page</span><span class="p">))</span>
+			<span class="n">tweets</span> <span class="o">=</span> <span class="bp">None</span>
+
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">page_limit</span><span class="p">:</span>
+				<span class="k">try</span><span class="p">:</span>
+					<span class="c"># get tweets from home_timeline of user</span>
+					<span class="n">tweets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">twapi</span><span class="o">.</span><span class="n">home_timeline</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">page</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">cpp</span><span class="p">)</span>
+				<span class="k">except</span> <span class="n">tweepy</span><span class="o">.</span><span class="n">TweepError</span> <span class="k">as</span> <span class="n">inst</span><span class="p">:</span>
+					<span class="c"># print(&quot;Tweepy Exception : &quot;)</span>
+					<span class="c"># print(inst)</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">no_exception</span> <span class="o">=</span> <span class="bp">False</span>
+					<span class="k">break</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">break</span>
+
+			<span class="k">if</span> <span class="p">(</span><span class="n">tweets</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tweets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+				<span class="k">break</span>
+
+			<span class="k">for</span> <span class="n">tweet</span> <span class="ow">in</span> <span class="n">tweets</span> <span class="ow">or</span> <span class="p">[]:</span>
+				<span class="c"># get tweet in json format</span>
+				<span class="n">tweet</span> <span class="o">=</span> <span class="n">tweet</span><span class="o">.</span><span class="n">_json</span>
+
+				<span class="c"># extract lead information from tweet</span>
+				<span class="n">lead_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_lead_doc</span><span class="p">(</span><span class="n">tweet</span><span class="p">)</span>
+
+				<span class="c"># store lead</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">leads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lead_doc</span><span class="p">)</span>
+
+				<span class="c"># check if reporter exists</span>
+				<span class="k">if</span> <span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;reporter_id&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;reporter_id&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reporter_ids</span><span class="p">:</span>
+					<span class="c"># store visited reporter id</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">reporter_ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;reporter_id&quot;</span><span class="p">])</span>
+
+					<span class="c"># create new reporter entry</span>
+					<span class="n">reporter_doc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reporter_doc</span><span class="p">(</span><span class="n">tweet</span><span class="p">)</span>
+
+					<span class="c"># store reporter</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">reporters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reporter_doc</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Scraper.get_lead_doc"><a class="viewcode-back" href="../../../hln.mod_twapi.html#hln.mod_twapi.twapi_handler.Scraper.get_lead_doc">[docs]</a>	<span class="k">def</span> <span class="nf">get_lead_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tweet</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Extracts relevant information from tweet for ES lead doc</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    tweet (dict): tweet</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES lead doc</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c"># copy doc from template</span>
+		<span class="n">lead_doc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">lead_doc</span><span class="p">)</span>
+
+		<span class="c"># lead metadata</span>
+		<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+		<span class="c"># get date in format used in es mapping</span>
+		<span class="n">created_at</span> <span class="o">=</span> <span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;created_at&quot;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">created_at</span><span class="p">:</span>
+			<span class="n">utc_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;utc_offset&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+			<span class="n">created_at</span> <span class="o">=</span> <span class="n">convert_to_utc_time</span><span class="p">(</span><span class="n">created_at</span><span class="p">,</span> <span class="n">utc_offset</span><span class="p">)</span>
+		<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;created_at&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">created_at</span>
+		<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;reporter_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">))</span>
+
+		<span class="c"># lead location</span>
+		<span class="n">coord</span> <span class="o">=</span> <span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;coordinates&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">coord</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+			<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;location&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coord</span>
+
+		<span class="c"># lead data</span>
+		<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;data&quot;</span><span class="p">][</span><span class="s">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;text&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s">&quot;entities&quot;</span> <span class="ow">in</span> <span class="n">tweet</span><span class="p">:</span>
+			<span class="n">entities</span> <span class="o">=</span> <span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;entities&quot;</span><span class="p">)</span>
+			<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;categories&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">entity</span><span class="p">[</span><span class="s">&#39;text&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;hashtags&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})]</span>
+			<span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;media&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}):</span>
+				<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;data&quot;</span><span class="p">][</span><span class="s">&quot;media&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+					<span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span>
+					<span class="s">&quot;media_url&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="p">[</span><span class="s">&quot;media_url&quot;</span><span class="p">],</span>
+					<span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="p">[</span><span class="s">&quot;type&quot;</span><span class="p">]</span>
+				<span class="p">})</span>
+			<span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="p">(</span><span class="n">entities</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;user_mentions&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}):</span>
+				<span class="n">lead_doc</span><span class="p">[</span><span class="s">&quot;data&quot;</span><span class="p">][</span><span class="s">&quot;entities&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+					<span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span>
+					<span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">],</span>
+					<span class="s">&quot;screen_name&quot;</span><span class="p">:</span> <span class="n">entity</span><span class="p">[</span><span class="s">&quot;screen_name&quot;</span><span class="p">]</span>
+				<span class="p">})</span>
+
+		<span class="k">return</span> <span class="n">lead_doc</span>
+</div>
+<div class="viewcode-block" id="Scraper.get_reporter_doc"><a class="viewcode-back" href="../../../hln.mod_twapi.html#hln.mod_twapi.twapi_handler.Scraper.get_reporter_doc">[docs]</a>	<span class="k">def</span> <span class="nf">get_reporter_doc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tweet</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Extracts relevant information from tweet for ES reporter doc</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    tweet (dict): tweet</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES reporter doc</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">user</span> <span class="o">=</span> <span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+		<span class="n">reporter_doc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">reporter_doc</span><span class="p">)</span>
+
+		<span class="c"># handle nested attributes here.</span>
+
+		<span class="c"># store user values in reporter_doc</span>
+		<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">reporter_doc</span><span class="p">:</span>
+			<span class="n">reporter_doc</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s">&#39;created_at&#39;</span><span class="p">:</span>
+				<span class="n">utc_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">tweet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;utc_offset&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+				<span class="n">reporter_doc</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_to_utc_time</span><span class="p">(</span><span class="n">reporter_doc</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">utc_offset</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">reporter_doc</span>
+</div></div>
+<div class="viewcode-block" id="convert_to_utc_time"><a class="viewcode-back" href="../../../hln.mod_twapi.html#hln.mod_twapi.twapi_handler.convert_to_utc_time">[docs]</a><span class="k">def</span> <span class="nf">convert_to_utc_time</span><span class="p">(</span><span class="n">dt_obj</span><span class="p">,</span> <span class="n">utc_offset</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Converts given time to utc time</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">	    dt_obj (datetime.datetime object): input time</span>
+<span class="sd">	    utc_offset (int): utc offset from input time in seconds</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">	    datetime.datetime: utc datetime</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">dt_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dt_obj</span><span class="p">),</span><span class="s">&#39;%a %b </span><span class="si">%d</span><span class="s"> %H:%M:%S +0000 %Y&#39;</span><span class="p">)</span>
+	<span class="n">off_sign</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">if</span> <span class="n">utc_offset</span><span class="p">:</span>
+		<span class="n">off_sign</span> <span class="o">=</span> <span class="n">utc_offset</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="n">utc_offset</span><span class="p">)</span>
+	<span class="n">utc_time</span> <span class="o">=</span> <span class="n">dt_obj</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">utc_offset</span><span class="p">))</span><span class="o">*</span><span class="n">off_sign</span>
+	<span class="n">dt_obj</span> <span class="o">=</span> <span class="n">utc_time</span>
+	<span class="n">dt_obj</span> <span class="o">=</span> <span class="n">dt_obj</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%Y/%m/</span><span class="si">%d</span><span class="s"> %I:%M:%S&quot;</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">dt_obj</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Deepak Sharma.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

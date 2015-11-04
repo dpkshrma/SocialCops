@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hln.es_queries &mdash; HomelessNet  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="HomelessNet  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hln.es_queries</h1><div class="highlight"><pre>
+<span class="k">def</span> <span class="nf">get_leads_query</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="get_leads_query"><a class="viewcode-back" href="../../hln.html#hln.es_queries.get_leads_query">[docs]</a>	<span class="sd">&quot;&quot;&quot;Forms leads query on basis of filters(categories and entities),</span>
+<span class="sd">		and using relevance score boost on entities match in search text</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">	    args (dict): search query dictionary containing search text,</span>
+<span class="sd">	    	categories, and entities</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">	    dict: ES query</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">search_filters</span> <span class="o">=</span> <span class="p">[]</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;search_entities&#39;</span><span class="p">])</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+		<span class="n">entities_filter</span> <span class="o">=</span> <span class="n">get_entities_filter</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;search_entities&#39;</span><span class="p">])</span>
+		<span class="n">search_filters</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">entities_filter</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;search_categories&#39;</span><span class="p">])</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+		<span class="n">categories_filter</span> <span class="o">=</span> <span class="n">get_categories_filter</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;search_categories&#39;</span><span class="p">])</span>
+		<span class="n">search_filters</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">categories_filter</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">search_filters</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+		<span class="n">leads_query</span> <span class="o">=</span> <span class="n">get_leads_boost_query</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">leads_query</span> <span class="o">=</span> <span class="p">{</span>
+    	    <span class="s">&quot;filtered&quot;</span><span class="p">:</span> <span class="p">{</span>
+				<span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="n">get_leads_boost_query</span><span class="p">(</span><span class="n">args</span><span class="p">),</span>
+				<span class="s">&quot;filter&quot;</span><span class="p">:</span> <span class="p">{</span>
+			    	<span class="s">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+			        	<span class="s">&quot;should&quot;</span><span class="p">:</span> <span class="n">search_filters</span>
+				    <span class="p">}</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="k">return</span> <span class="n">leads_query</span>
+
+<span class="k">def</span> <span class="nf">get_entities_filter</span><span class="p">(</span><span class="n">search_entities</span><span class="p">):</span></div>
+<div class="viewcode-block" id="get_entities_filter"><a class="viewcode-back" href="../../hln.html#hln.es_queries.get_entities_filter">[docs]</a>	<span class="sd">&quot;&quot;&quot;Forms filter dictionary for search_entities</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">	    search_entities (string): entities in search text</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">	    dict: ES filter query</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="p">{</span>
+		<span class="s">&quot;nested&quot;</span><span class="p">:</span> <span class="p">{</span>
+			<span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="s">&quot;data.entities&quot;</span><span class="p">,</span>
+				<span class="s">&quot;filter&quot;</span><span class="p">:{</span>
+					<span class="s">&quot;bool&quot;</span><span class="p">:{</span>
+						<span class="s">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+						<span class="p">{</span>
+							<span class="s">&quot;terms&quot;</span><span class="p">:</span> <span class="p">{</span>
+								<span class="s">&quot;data.entities.screen_name&quot;</span><span class="p">:</span> <span class="n">search_entities</span>
+							<span class="p">}</span>
+						<span class="p">},</span>
+						<span class="p">{</span>
+							<span class="s">&quot;terms&quot;</span><span class="p">:</span> <span class="p">{</span>
+								<span class="s">&quot;data.entities.name&quot;</span><span class="p">:</span> <span class="n">search_entities</span>
+							<span class="p">}</span>
+						<span class="p">}</span>
+					<span class="p">]</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+	    <span class="p">}</span>
+	<span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">get_categories_filter</span><span class="p">(</span><span class="n">search_categories</span><span class="p">):</span></div>
+<div class="viewcode-block" id="get_categories_filter"><a class="viewcode-back" href="../../hln.html#hln.es_queries.get_categories_filter">[docs]</a>	<span class="sd">&quot;&quot;&quot;Forms categories filter</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">	    search_categories (string): categories in search text</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">	    dict: ES filter query</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="p">{</span>
+		<span class="s">&quot;terms&quot;</span><span class="p">:</span> <span class="p">{</span>
+			<span class="s">&quot;categories&quot;</span><span class="p">:</span> <span class="n">search_categories</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">get_leads_boost_query</span><span class="p">(</span><span class="n">args</span><span class="p">):</span></div>
+<div class="viewcode-block" id="get_leads_boost_query"><a class="viewcode-back" href="../../hln.html#hln.es_queries.get_leads_boost_query">[docs]</a>	<span class="sd">&quot;&quot;&quot;Forms leads boost query on basis of entities</span>
+<span class="sd">		in search text</span>
+<span class="sd">	</span>
+<span class="sd">	Args:</span>
+<span class="sd">	    args (dict): contains search text, categories, entities</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">	    dict: ES query</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">return</span> <span class="p">{</span>
+	    <span class="s">&quot;nested&quot;</span><span class="p">:</span> <span class="p">{</span>
+	       <span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="s">&quot;data&quot;</span><span class="p">,</span>
+	       <span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+	            <span class="s">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+	               <span class="s">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+						<span class="p">{</span>
+						   <span class="s">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+						      <span class="s">&quot;data.text&quot;</span><span class="p">:{</span>
+						          <span class="s">&quot;query&quot;</span><span class="p">:</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;search_text&#39;</span><span class="p">]</span>
+						      <span class="p">}</span>
+						   <span class="p">}</span>
+						<span class="p">},</span>
+						<span class="p">{</span>
+						    <span class="s">&quot;nested&quot;</span><span class="p">:</span> <span class="p">{</span>
+						       <span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="s">&quot;data.entities&quot;</span><span class="p">,</span>
+						       <span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+						           <span class="s">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+						              <span class="s">&quot;data.entities.name&quot;</span><span class="p">:{</span>
+						                  <span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="n">args</span><span class="p">[</span><span class="s">&#39;search_text&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;@&#39;</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">),</span>
+						                  <span class="s">&quot;boost&quot;</span><span class="p">:</span> <span class="mi">2</span>
+						              <span class="p">}</span>
+						           <span class="p">}</span>
+						       <span class="p">}</span>
+						    <span class="p">}</span>
+						<span class="p">}</span>
+	               <span class="p">]</span>
+	           <span class="p">}</span>
+	       <span class="p">}</span>
+	    <span class="p">}</span>
+	<span class="p">}</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Deepak Sharma.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>run &mdash; HomelessNet  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="HomelessNet  documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for run</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Main run script to start server and load data in ES&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">hln.mod_twapi.es_loader</span> <span class="kn">as</span> <span class="nn">es_loader</span>
+<span class="kn">from</span> <span class="nn">hln</span> <span class="kn">import</span> <span class="n">app</span>
+
+<div class="viewcode-block" id="init"><a class="viewcode-back" href="../run.html#run.init">[docs]</a><span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Loads ES with tweets and starts server</span>
+
+<span class="sd">	Loads ES with the fetched tweet stream,</span>
+<span class="sd">	and start the flask application server</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">es_load</span><span class="p">()</span>
+	<span class="n">start_server</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="es_load"><a class="viewcode-back" href="../run.html#run.es_load">[docs]</a><span class="k">def</span> <span class="nf">es_load</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Loads ES with tweets</span>
+
+<span class="sd">	Fetches data from twitter stream and</span>
+<span class="sd">	indexes parsed data in ES index</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">es_loader</span><span class="o">.</span><span class="n">index</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="start_server"><a class="viewcode-back" href="../run.html#run.start_server">[docs]</a><span class="k">def</span> <span class="nf">start_server</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Start the server</span>
+
+<span class="sd">	Starts the Flask application server on</span>
+<span class="sd">	localhost, port 8080</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">&#39;127.0.0.1&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8080</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="create_arg_parser"><a class="viewcode-back" href="../run.html#run.create_arg_parser">[docs]</a><span class="k">def</span> <span class="nf">create_arg_parser</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;Creates argument parser</span>
+<span class="sd">	</span>
+<span class="sd">	Returns:</span>
+<span class="sd">	    argparse.ArgumentParser: Parser to fetch arguments from terminal</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&quot;Welcome to Homeless Network Server! (run to start server)&quot;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s">&quot;HomelessNet&quot;</span><span class="p">)</span>
+
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--init&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;run_init&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Fetch tweets, load ES index, start the server&quot;</span><span class="p">)</span>
+	<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;--esload&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s">&#39;run_es_load&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&quot;Fetch tweets from twitter api and load ES index&quot;</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">parser</span>
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+	<span class="n">parser</span> <span class="o">=</span> <span class="n">create_arg_parser</span><span class="p">()</span>
+	<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+	<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">run_init</span><span class="p">:</span>
+		<span class="n">init</span><span class="p">()</span>
+	<span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">run_es_load</span><span class="p">:</span>
+		<span class="n">es_load</span><span class="p">()</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">start_server</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Deepak Sharma.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

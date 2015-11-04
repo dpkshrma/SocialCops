@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hln.es_handler &mdash; HomelessNet  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="HomelessNet  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hln.es_handler</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Elasticsearch handler&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">elasticsearch</span> <span class="kn">import</span> <span class="n">Elasticsearch</span> <span class="k">as</span> <span class="n">ES</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">config</span>
+<span class="kn">import</span> <span class="nn">hln.es_queries</span> <span class="kn">as</span> <span class="nn">esq</span>
+
+<div class="viewcode-block" id="ES_Handler"><a class="viewcode-back" href="../../hln.html#hln.es_handler.ES_Handler">[docs]</a><span class="k">class</span> <span class="nc">ES_Handler</span><span class="p">():</span>
+	<span class="sd">&quot;&quot;&quot;ES_Handler Class&quot;&quot;&quot;</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;creates elasticsearch.Elasticsearch object(es)&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">es</span> <span class="o">=</span> <span class="n">ES</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ES_Handler.get_latest_leads"><a class="viewcode-back" href="../../hln.html#hln.es_handler.ES_Handler.get_latest_leads">[docs]</a>	<span class="k">def</span> <span class="nf">get_latest_leads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_query</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Retrieves latest lead docs with reporter information</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    search_query (str, optional): search query text</span>
+<span class="sd">		    count (int, optional): number of lead docs</span>
+<span class="sd">		    offset (int, optional): lead docs offset</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES query result</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">leads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_leads</span><span class="p">(</span><span class="n">search_query</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+
+		<span class="c"># store reporter details for every lead ( @todo : use cache(redis/memcache?) )</span>
+		<span class="k">for</span> <span class="n">lead</span> <span class="ow">in</span> <span class="n">leads</span><span class="p">[</span><span class="s">&quot;hits&quot;</span><span class="p">][</span><span class="s">&quot;hits&quot;</span><span class="p">]:</span>
+			<span class="n">reporter_id</span> <span class="o">=</span> <span class="n">lead</span><span class="p">[</span><span class="s">&#39;_source&#39;</span><span class="p">][</span><span class="s">&quot;reporter_id&quot;</span><span class="p">]</span>
+			<span class="n">lead</span><span class="p">[</span><span class="s">&#39;_source&#39;</span><span class="p">][</span><span class="s">&#39;reporter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reporter</span><span class="p">(</span><span class="n">reporter_id</span><span class="p">)[</span><span class="s">&quot;_source&quot;</span><span class="p">]</span>
+		<span class="k">return</span> <span class="n">leads</span>
+</div>
+<div class="viewcode-block" id="ES_Handler.get_leads"><a class="viewcode-back" href="../../hln.html#hln.es_handler.ES_Handler.get_leads">[docs]</a>	<span class="k">def</span> <span class="nf">get_leads</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_query</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Retrieves latest lead docs</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    search_query (str, optional): search query text</span>
+<span class="sd">		    count (int, optional): number of lead docs</span>
+<span class="sd">		    offset (int, optional): lead docs offset</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES query result</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">search_query</span><span class="p">):</span>
+			<span class="n">search_text</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">search_query</span><span class="p">[</span><span class="s">&#39;tokens&#39;</span><span class="p">])</span>
+			<span class="n">args</span> <span class="o">=</span> <span class="p">{</span>
+				<span class="s">&#39;search_text&#39;</span><span class="p">:</span> <span class="n">search_text</span><span class="p">,</span>
+				<span class="s">&#39;search_categories&#39;</span><span class="p">:</span> <span class="n">search_query</span><span class="p">[</span><span class="s">&#39;categories&#39;</span><span class="p">],</span>
+				<span class="s">&#39;search_entities&#39;</span><span class="p">:</span> <span class="n">search_query</span><span class="p">[</span><span class="s">&#39;entities&#39;</span><span class="p">]</span>
+			<span class="p">}</span>
+			<span class="n">q</span> <span class="o">=</span> <span class="n">esq</span><span class="o">.</span><span class="n">get_leads_query</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">q</span> <span class="o">=</span> <span class="p">{</span>
+				<span class="s">&quot;match_all&quot;</span><span class="p">:{}</span>
+			<span class="p">}</span>
+
+		<span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s">&quot;from&quot;</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">),</span>
+			<span class="s">&quot;size&quot;</span><span class="p">:</span><span class="n">count</span><span class="p">,</span>
+			<span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="n">q</span>
+		<span class="p">}</span>
+		<span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">es_index_name</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s">&#39;lead&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">404</span><span class="p">])</span>
+		<span class="k">return</span> <span class="n">res</span>
+</div>
+<div class="viewcode-block" id="ES_Handler.get_reporter"><a class="viewcode-back" href="../../hln.html#hln.es_handler.ES_Handler.get_reporter">[docs]</a>	<span class="k">def</span> <span class="nf">get_reporter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reporter_id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Retrieves reporter by id</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    reporter_id (int, required): reporter id</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES query result</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">reporter_id</span><span class="p">:</span>
+			<span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">es</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">es_index_name</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s">&#39;reporter&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">reporter_id</span><span class="p">),</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">404</span><span class="p">]))</span>
+</div>
+<div class="viewcode-block" id="ES_Handler.get_doctype_count"><a class="viewcode-back" href="../../hln.html#hln.es_handler.ES_Handler.get_doctype_count">[docs]</a>	<span class="k">def</span> <span class="nf">get_doctype_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s">&quot;lead&quot;</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Fetches ES doc_type count</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    doc_type (str, optional): doc_type</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES query result</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">es</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">es_index_name</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="n">doc_type</span><span class="p">);</span>
+		<span class="k">return</span> <span class="n">count</span>
+</div>
+<div class="viewcode-block" id="ES_Handler.get_reportercount"><a class="viewcode-back" href="../../hln.html#hln.es_handler.ES_Handler.get_reportercount">[docs]</a>	<span class="k">def</span> <span class="nf">get_reportercount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Fetches reporter docs count</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES query result</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_doctype_count</span><span class="p">(</span><span class="n">doc_type</span><span class="o">=</span><span class="s">&#39;reporter&#39;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">count</span>
+</div>
+<div class="viewcode-block" id="ES_Handler.get_leadcount"><a class="viewcode-back" href="../../hln.html#hln.es_handler.ES_Handler.get_leadcount">[docs]</a>	<span class="k">def</span> <span class="nf">get_leadcount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">agg_type</span><span class="p">,</span> <span class="n">time_interval</span><span class="o">=</span><span class="s">&#39;week&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Fetches lead docs counts grouped by aggregation type</span>
+<span class="sd">		</span>
+<span class="sd">		Args:</span>
+<span class="sd">		    agg_type (string): aggregation type</span>
+<span class="sd">		    time_interval (str, optional): date histogram time interval</span>
+<span class="sd">		    size (int, optional): aggregation buckets counts</span>
+<span class="sd">		</span>
+<span class="sd">		Returns:</span>
+<span class="sd">		    dict: ES query result - lead count grouped by aggregation type</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="n">agg_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_doctype_count</span><span class="p">(</span><span class="n">doc_type</span><span class="o">=</span><span class="s">&#39;lead&#39;</span><span class="p">)</span>
+
+		<span class="n">agg</span> <span class="o">=</span> <span class="p">{}</span>
+		<span class="n">q</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s">&quot;match_all&quot;</span><span class="p">:</span> <span class="p">{}</span>
+		<span class="p">}</span>
+
+		<span class="k">if</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s">&quot;reporter&quot;</span><span class="p">:</span>
+			<span class="n">agg</span> <span class="o">=</span> <span class="p">{</span>
+				<span class="s">&quot;count_by_reporter&quot;</span><span class="p">:{</span>
+					<span class="s">&quot;terms&quot;</span><span class="p">:{</span>
+						<span class="s">&quot;field&quot;</span><span class="p">:</span><span class="s">&quot;reporter_id&quot;</span><span class="p">,</span>
+						<span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="n">size</span>
+					<span class="p">}</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+		<span class="k">elif</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s">&quot;category&quot;</span><span class="p">:</span>
+			<span class="n">agg</span> <span class="o">=</span> <span class="p">{</span>
+				<span class="s">&quot;count_by_category&quot;</span><span class="p">:{</span>
+					<span class="s">&quot;terms&quot;</span><span class="p">:{</span>
+						<span class="s">&quot;field&quot;</span><span class="p">:</span><span class="s">&quot;categories&quot;</span><span class="p">,</span>
+						<span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="n">size</span><span class="p">,</span>
+						<span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s">&quot;_count&quot;</span><span class="p">:</span> <span class="s">&quot;desc&quot;</span><span class="p">}</span>
+					<span class="p">}</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+		<span class="k">elif</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s">&quot;date&quot;</span><span class="p">:</span>
+			<span class="n">agg</span> <span class="o">=</span> <span class="p">{</span>
+				<span class="s">&quot;count_by_date&quot;</span><span class="p">:{</span>
+					<span class="s">&quot;date_histogram&quot;</span><span class="p">:{</span>
+						<span class="s">&quot;field&quot;</span><span class="p">:</span><span class="s">&quot;created_at&quot;</span><span class="p">,</span>
+						<span class="s">&quot;interval&quot;</span><span class="p">:</span> <span class="n">time_interval</span>
+					<span class="p">}</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+			<span class="c"># no size option in date_histogram</span>
+			<span class="k">if</span> <span class="n">time_interval</span> <span class="o">==</span> <span class="s">&quot;day&quot;</span><span class="p">:</span>
+				<span class="n">di</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">time_interval</span> <span class="o">==</span> <span class="s">&quot;week&quot;</span><span class="p">:</span>
+				<span class="n">di</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="mi">7</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">time_interval</span> <span class="o">==</span> <span class="s">&quot;month&quot;</span><span class="p">:</span>
+				<span class="n">di</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="o">*</span><span class="mi">30</span><span class="p">)</span>
+			<span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">di</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&quot;%Y/%m/</span><span class="si">%d</span><span class="s"> %I:%M:%S&quot;</span><span class="p">)</span>
+			<span class="n">q</span> <span class="o">=</span> <span class="p">{</span>
+				<span class="s">&quot;filtered&quot;</span><span class="p">:{</span>
+					<span class="s">&quot;query&quot;</span><span class="p">:{</span>
+						<span class="s">&quot;match_all&quot;</span><span class="p">:</span> <span class="p">{}</span>
+					<span class="p">},</span>
+					<span class="s">&quot;filter&quot;</span><span class="p">:</span> <span class="p">{</span>
+						<span class="s">&quot;range&quot;</span><span class="p">:</span> <span class="p">{</span>
+							<span class="s">&quot;created_at&quot;</span><span class="p">:</span> <span class="p">{</span>
+								<span class="s">&quot;gte&quot;</span><span class="p">:</span> <span class="n">d</span>
+							<span class="p">}</span>
+						<span class="p">}</span>
+					<span class="p">}</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+
+		<span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+			<span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="n">q</span><span class="p">,</span>
+			<span class="s">&quot;aggs&quot;</span><span class="p">:</span> <span class="n">agg</span>
+		<span class="p">}</span>
+		<span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s">&quot;homeless_net&quot;</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s">&#39;lead&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">404</span><span class="p">],</span> <span class="n">_source</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+		<span class="c"># store reporter names for bucket keys</span>
+		<span class="k">if</span> <span class="n">agg_type</span> <span class="o">==</span> <span class="s">&quot;reporter&quot;</span><span class="p">:</span>
+			<span class="n">buckets</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s">&#39;aggregations&#39;</span><span class="p">][</span><span class="s">&#39;count_by_reporter&#39;</span><span class="p">][</span><span class="s">&#39;buckets&#39;</span><span class="p">]</span>
+			<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">reporter</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">buckets</span><span class="p">):</span>
+				<span class="n">reporter_id</span> <span class="o">=</span> <span class="n">reporter</span><span class="p">[</span><span class="s">&#39;key&#39;</span><span class="p">]</span>
+				<span class="n">reporter_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reporter</span><span class="p">(</span><span class="n">reporter_id</span><span class="p">)[</span><span class="s">&quot;_source&quot;</span><span class="p">][</span><span class="s">&quot;name&quot;</span><span class="p">]</span>
+				<span class="n">buckets</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">reporter_name</span>
+
+		<span class="k">return</span> <span class="n">res</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Deepak Sharma.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

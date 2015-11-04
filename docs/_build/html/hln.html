@@ -1,0 +1,535 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>hln package &mdash; HomelessNet  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="HomelessNet  documentation" href="index.html" />
+    <link rel="next" title="hln.mod_twapi package" href="hln.mod_twapi.html" />
+    <link rel="prev" title="config module" href="config.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="hln-package">
+<h1>hln package<a class="headerlink" href="#hln-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hln.mod_twapi.html">hln.mod_twapi package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hln.mod_twapi.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hln.mod_twapi.html#module-hln.mod_twapi.config">hln.mod_twapi.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hln.mod_twapi.html#module-hln.mod_twapi.doc_templates">hln.mod_twapi.doc_templates module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hln.mod_twapi.html#module-hln.mod_twapi.es_loader">hln.mod_twapi.es_loader module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hln.mod_twapi.html#module-hln.mod_twapi.mappings">hln.mod_twapi.mappings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hln.mod_twapi.html#module-hln.mod_twapi.twapi_handler">hln.mod_twapi.twapi_handler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hln.mod_twapi.html#module-hln.mod_twapi">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-hln.es_handler">
+<span id="hln-es-handler-module"></span><h2>hln.es_handler module<a class="headerlink" href="#module-hln.es_handler" title="Permalink to this headline">¶</a></h2>
+<p>Elasticsearch handler</p>
+<dl class="class">
+<dt id="hln.es_handler.ES_Handler">
+<em class="property">class </em><code class="descclassname">hln.es_handler.</code><code class="descname">ES_Handler</code><a class="reference internal" href="_modules/hln/es_handler.html#ES_Handler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_handler.ES_Handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>ES_Handler Class</p>
+<dl class="method">
+<dt id="hln.es_handler.ES_Handler.get_doctype_count">
+<code class="descname">get_doctype_count</code><span class="sig-paren">(</span><em>doc_type='lead'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_handler.html#ES_Handler.get_doctype_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_handler.ES_Handler.get_doctype_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches ES doc_type count</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>doc_type (str, optional): doc_type</dd>
+<dt>Returns:</dt>
+<dd>dict: ES query result</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hln.es_handler.ES_Handler.get_latest_leads">
+<code class="descname">get_latest_leads</code><span class="sig-paren">(</span><em>search_query=''</em>, <em>count=5</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_handler.html#ES_Handler.get_latest_leads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_handler.ES_Handler.get_latest_leads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves latest lead docs with reporter information</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>search_query (str, optional): search query text
+count (int, optional): number of lead docs
+offset (int, optional): lead docs offset</dd>
+<dt>Returns:</dt>
+<dd>dict: ES query result</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hln.es_handler.ES_Handler.get_leadcount">
+<code class="descname">get_leadcount</code><span class="sig-paren">(</span><em>agg_type</em>, <em>time_interval='week'</em>, <em>size=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_handler.html#ES_Handler.get_leadcount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_handler.ES_Handler.get_leadcount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches lead docs counts grouped by aggregation type</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>agg_type (string): aggregation type
+time_interval (str, optional): date histogram time interval
+size (int, optional): aggregation buckets counts</dd>
+<dt>Returns:</dt>
+<dd>dict: ES query result - lead count grouped by aggregation type</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hln.es_handler.ES_Handler.get_leads">
+<code class="descname">get_leads</code><span class="sig-paren">(</span><em>search_query=''</em>, <em>count=5</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_handler.html#ES_Handler.get_leads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_handler.ES_Handler.get_leads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves latest lead docs</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>search_query (str, optional): search query text
+count (int, optional): number of lead docs
+offset (int, optional): lead docs offset</dd>
+<dt>Returns:</dt>
+<dd>dict: ES query result</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hln.es_handler.ES_Handler.get_reporter">
+<code class="descname">get_reporter</code><span class="sig-paren">(</span><em>reporter_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_handler.html#ES_Handler.get_reporter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_handler.ES_Handler.get_reporter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves reporter by id</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>reporter_id (int, required): reporter id</dd>
+<dt>Returns:</dt>
+<dd>dict: ES query result</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hln.es_handler.ES_Handler.get_reportercount">
+<code class="descname">get_reportercount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_handler.html#ES_Handler.get_reportercount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_handler.ES_Handler.get_reportercount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches reporter docs count</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>dict: ES query result</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-hln.es_queries">
+<span id="hln-es-queries-module"></span><h2>hln.es_queries module<a class="headerlink" href="#module-hln.es_queries" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="hln.es_queries.get_categories_filter">
+<code class="descclassname">hln.es_queries.</code><code class="descname">get_categories_filter</code><span class="sig-paren">(</span><em>search_categories</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_queries.html#get_categories_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_queries.get_categories_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forms categories filter</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>search_categories (string): categories in search text</dd>
+<dt>Returns:</dt>
+<dd>dict: ES filter query</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="hln.es_queries.get_entities_filter">
+<code class="descclassname">hln.es_queries.</code><code class="descname">get_entities_filter</code><span class="sig-paren">(</span><em>search_entities</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_queries.html#get_entities_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_queries.get_entities_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forms filter dictionary for search_entities</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>search_entities (string): entities in search text</dd>
+<dt>Returns:</dt>
+<dd>dict: ES filter query</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="hln.es_queries.get_leads_boost_query">
+<code class="descclassname">hln.es_queries.</code><code class="descname">get_leads_boost_query</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_queries.html#get_leads_boost_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_queries.get_leads_boost_query" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Forms leads boost query on basis of entities</dt>
+<dd>in search text</dd>
+<dt>Args:</dt>
+<dd>args (dict): contains search text, categories, entities</dd>
+<dt>Returns:</dt>
+<dd>dict: ES query</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="hln.es_queries.get_leads_query">
+<code class="descclassname">hln.es_queries.</code><code class="descname">get_leads_query</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/es_queries.html#get_leads_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.es_queries.get_leads_query" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Forms leads query on basis of filters(categories and entities),</dt>
+<dd>and using relevance score boost on entities match in search text</dd>
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>args (dict): search query dictionary containing search text,</dt>
+<dd>categories, and entities</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>dict: ES query</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-hln.user">
+<span id="hln-user-module"></span><h2>hln.user module<a class="headerlink" href="#module-hln.user" title="Permalink to this headline">¶</a></h2>
+<p>User Module to authenticate user credentials</p>
+<dl class="class">
+<dt id="hln.user.User">
+<em class="property">class </em><code class="descclassname">hln.user.</code><code class="descname">User</code><span class="sig-paren">(</span><em>cred</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/user.html#User"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.user.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>User Class</p>
+<dl class="method">
+<dt id="hln.user.User.authenticate">
+<code class="descname">authenticate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/user.html#User.authenticate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.user.User.authenticate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Authenticates user from mysql db stored user credentials</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>bool: authentication result</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hln.user.User.pwd">
+<code class="descname">pwd</code><em class="property"> = ''</em><a class="headerlink" href="#hln.user.User.pwd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="hln.user.User.uname">
+<code class="descname">uname</code><em class="property"> = ''</em><a class="headerlink" href="#hln.user.User.uname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-hln.views">
+<span id="hln-views-module"></span><h2>hln.views module<a class="headerlink" href="#module-hln.views" title="Permalink to this headline">¶</a></h2>
+<p>Contains Classes for different View Routes</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>url_rules (list): contains url rule objects, for add_url_rules() function</dd>
+</dl>
+<dl class="class">
+<dt id="hln.views.Home">
+<em class="property">class </em><code class="descclassname">hln.views.</code><code class="descname">Home</code><a class="reference internal" href="_modules/hln/views.html#Home"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Home" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">flask.views.MethodView</span></code></p>
+<p>Base url route Class</p>
+<dl class="method">
+<dt id="hln.views.Home.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#Home.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Home.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>renders main dashboard</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hln.views.Home.methods">
+<code class="descname">methods</code><em class="property"> = ['GET']</em><a class="headerlink" href="#hln.views.Home.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hln.views.LeadCount">
+<em class="property">class </em><code class="descclassname">hln.views.</code><code class="descname">LeadCount</code><a class="reference internal" href="_modules/hln/views.html#LeadCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.LeadCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">flask.views.MethodView</span></code></p>
+<p>LeadCount url route Class</p>
+<dl class="attribute">
+<dt id="hln.views.LeadCount.methods">
+<code class="descname">methods</code><em class="property"> = ['POST']</em><a class="headerlink" href="#hln.views.LeadCount.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hln.views.LeadCount.post">
+<code class="descname">post</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#LeadCount.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.LeadCount.post" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Fetches lead document count based on bucket aggregations</dt>
+<dd>if agg_type is None, it fetches total documents count</dd>
+<dt>Returns:</dt>
+<dd>string: document counts</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hln.views.Leads">
+<em class="property">class </em><code class="descclassname">hln.views.</code><code class="descname">Leads</code><a class="reference internal" href="_modules/hln/views.html#Leads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Leads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">flask.views.MethodView</span></code></p>
+<p>Leads url route Class</p>
+<dl class="attribute">
+<dt id="hln.views.Leads.methods">
+<code class="descname">methods</code><em class="property"> = ['POST']</em><a class="headerlink" href="#hln.views.Leads.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hln.views.Leads.post">
+<code class="descname">post</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#Leads.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Leads.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes search query string using nltk,
+and fetches latest leads from elasticsearch
+handler (es_handler) module</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>string: processed leads docs (relevance boosted and filtered based on query)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hln.views.Leads.process_query">
+<code class="descname">process_query</code><span class="sig-paren">(</span><em>search_query</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#Leads.process_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Leads.process_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes stopwords, extracts categories(#tags) and entities(&#64;mentions)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>search_query (string): search query string</dd>
+<dt>Returns:</dt>
+<dd>dict: parsed dictionary containing tokens, categories and entities</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hln.views.Login">
+<em class="property">class </em><code class="descclassname">hln.views.</code><code class="descname">Login</code><a class="reference internal" href="_modules/hln/views.html#Login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">flask.views.MethodView</span></code></p>
+<p>Login url route Class</p>
+<dl class="method">
+<dt id="hln.views.Login.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#Login.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Login.get" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>renders login page when user not in session,</dt>
+<dd>redirects to home otherwise</dd>
+<dt>Returns:</dt>
+<dd>redirect: page redirect</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hln.views.Login.methods">
+<code class="descname">methods</code><em class="property"> = ['GET', 'POST']</em><a class="headerlink" href="#hln.views.Login.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hln.views.Login.post">
+<code class="descname">post</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#Login.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Login.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks for user credentials</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>redirect: page redirect</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hln.views.Logout">
+<em class="property">class </em><code class="descclassname">hln.views.</code><code class="descname">Logout</code><a class="reference internal" href="_modules/hln/views.html#Logout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Logout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">flask.views.MethodView</span></code></p>
+<p>Logout url route Class</p>
+<dl class="method">
+<dt id="hln.views.Logout.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#Logout.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Logout.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears flask session and redirects to login page</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>redirect: page redirect</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="hln.views.Logout.methods">
+<code class="descname">methods</code><em class="property"> = ['GET']</em><a class="headerlink" href="#hln.views.Logout.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hln.views.ReporterCount">
+<em class="property">class </em><code class="descclassname">hln.views.</code><code class="descname">ReporterCount</code><a class="reference internal" href="_modules/hln/views.html#ReporterCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.ReporterCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">flask.views.MethodView</span></code></p>
+<p>ReporterCount url route Class</p>
+<dl class="attribute">
+<dt id="hln.views.ReporterCount.methods">
+<code class="descname">methods</code><em class="property"> = ['POST']</em><a class="headerlink" href="#hln.views.ReporterCount.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hln.views.ReporterCount.post">
+<code class="descname">post</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#ReporterCount.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.ReporterCount.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches reporter documents count from ES</p>
+<dl class="docutils">
+<dt>Returns:</dt>
+<dd>string: reporters count</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="hln.views.Reporters">
+<em class="property">class </em><code class="descclassname">hln.views.</code><code class="descname">Reporters</code><a class="reference internal" href="_modules/hln/views.html#Reporters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Reporters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">flask.views.MethodView</span></code></p>
+<p>Reporters url route Class</p>
+<dl class="attribute">
+<dt id="hln.views.Reporters.methods">
+<code class="descname">methods</code><em class="property"> = ['POST']</em><a class="headerlink" href="#hln.views.Reporters.methods" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="hln.views.Reporters.post">
+<code class="descname">post</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#Reporters.post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.Reporters.post" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Fetches reporter document from ES, based on</dt>
+<dd>reporter id</dd>
+<dt>Returns:</dt>
+<dd>string: reporter document</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="hln.views.add_url_rules">
+<code class="descclassname">hln.views.</code><code class="descname">add_url_rules</code><span class="sig-paren">(</span><em>url_rules</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#add_url_rules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.add_url_rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds Flask Url Route Rules to Flask app (flask.Flask module)</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd><dl class="first last docutils">
+<dt>url_rules (list): list of url object. Every object must have</dt>
+<dd>required keys - &#8216;url, class, view_name&#8217; and can have
+optional key - &#8216;methods&#8217; (&#8216;GET&#8217;/&#8217;POST&#8217;)</dd>
+</dl>
+</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="hln.views.login_required">
+<code class="descclassname">hln.views.</code><code class="descname">login_required</code><span class="sig-paren">(</span><em>method</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hln/views.html#login_required"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hln.views.login_required" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks Login status of user</p>
+<p>Annotation method to check authorise url route.
+Wraps a function using functools module</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>method (class bound method): get/post methods of different a url route class</dd>
+<dt>Returns:</dt>
+<dd>function: wrapper function</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-hln">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-hln" title="Permalink to this headline">¶</a></h2>
+<p>Creates Flask app and includes view url route classes</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>app (flask.Flask object): Flask application object
+es (ES_Handler object): Elasticsearch Handler object</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">hln package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-hln.es_handler">hln.es_handler module</a></li>
+<li><a class="reference internal" href="#module-hln.es_queries">hln.es_queries module</a></li>
+<li><a class="reference internal" href="#module-hln.user">hln.user module</a></li>
+<li><a class="reference internal" href="#module-hln.views">hln.views module</a></li>
+<li><a class="reference internal" href="#module-hln">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="config.html" title="previous chapter">config module</a></li>
+      <li>Next: <a href="hln.mod_twapi.html" title="next chapter">hln.mod_twapi package</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/hln.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Deepak Sharma.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
+      |
+      <a href="_sources/hln.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
