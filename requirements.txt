@@ -2,7 +2,7 @@ Flask==0.10.1
 Jinja2==2.8
 MarkupSafe==0.23
 PyMySQL==0.6.7
-Werkzeug==0.10.4
+Werkzeug==0.15.3
 elasticsearch==2.1.0
 itsdangerous==0.24
 nltk==3.1
